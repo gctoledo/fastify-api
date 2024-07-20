@@ -1,11 +1,13 @@
 import fastify from 'fastify'
+import { env } from './env'
+import { transactionsRoutes } from './routes/transactions'
 
 const app = fastify()
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
+app.register(transactionsRoutes, {
+  prefix: 'transactions',
 })
 
-app.listen({ port: 3333 }).then(() => {
+app.listen({ port: Number(env.PORT) }).then(() => {
   console.log('HTTP server running')
 })
