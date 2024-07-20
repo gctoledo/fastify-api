@@ -1,6 +1,7 @@
-import { expect, it, beforeAll, afterAll, describe } from 'vitest'
+import { expect, it, beforeAll, afterAll, describe, beforeEach } from 'vitest'
 import request from 'supertest'
 import app from '../app'
+import { handleDb } from './utils/handle-db'
 
 describe('Transactions routes', () => {
   beforeAll(async () => {
@@ -9,6 +10,11 @@ describe('Transactions routes', () => {
 
   afterAll(async () => {
     await app.close()
+  })
+
+  beforeEach(() => {
+    handleDb.clearDb()
+    handleDb.loadMigrations()
   })
 
   it('should be able to create a new transaction', async () => {
