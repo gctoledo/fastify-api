@@ -5,31 +5,50 @@ import {
   createTransactionBodySchema,
   getTransactionParamsSchema,
 } from '../schemas/transactions'
+import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
 
 export const transactionsRoutes = async (app: FastifyInstance) => {
-  app.get('/', async (_, reply) => {
-    const transactions = await knex('transactions').select('*')
+  app.get('/', { preHandler: [checkSessionIdExists] }, async (req, reply) => {
+    const { sessionId } = req.cookies
+
+    const transactions = await knex('transactions').select('*').where({
+      session_id: sessionId,
+    })
 
     return reply.status(200).send({ transactions })
   })
 
-  app.get('/:transactionId', async (req, reply) => {
-    const { transactionId } = getTransactionParamsSchema.parse(req.params)
+  app.get(
+    '/:transactionId',
+    { preHandler: [checkSessionIdExists] },
+    async (req, reply) => {
+      const { transactionId } = getTransactionParamsSchema.parse(req.params)
 
-    const transaction = await knex('transactions')
-      .where('id', transactionId)
-      .first()
+      const { sessionId } = req.cookies
 
-    return reply.status(200).send({ transaction })
-  })
+      const transaction = await knex('transactions')
+        .where('id', transactionId)
+        .andWhere('session_id', sessionId)
+        .first()
 
-  app.get('/balance', async (req, reply) => {
-    const balance = await knex('transactions')
-      .sum('amount', { as: 'amount' })
-      .first()
+      return reply.status(200).send({ transaction })
+    },
+  )
 
-    return reply.status(200).send({ balance })
-  })
+  app.get(
+    '/balance',
+    { preHandler: [checkSessionIdExists] },
+    async (req, reply) => {
+      const { sessionId } = req.cookies
+
+      const balance = await knex('transactions')
+        .where('session_id', sessionId)
+        .sum('amount', { as: 'amount' })
+        .first()
+
+      return reply.status(200).send({ balance })
+    },
+  )
 
   app.post('/', async (req, reply) => {
     const { amount, title, type } = createTransactionBodySchema.parse(req.body)
