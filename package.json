@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "lint": "eslint src --ext .ts --fix",
+    "migration": "knex --knexfile ./knexfile.ts migrate:latest",
     "test": "vitest",
     "build": "tsup src --out-dir build"
   },
