@@ -6,6 +6,6 @@ app.register(cors, {
   origin: '*',
 })
 
-app.listen({ port: Number(env.PORT) }).then(() => {
+app.listen({ port: 10000 }).then(() => {
   console.log(`HTTP server running on port ${env.PORT}`)
 })
